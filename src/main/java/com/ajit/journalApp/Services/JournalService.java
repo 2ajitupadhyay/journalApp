@@ -37,13 +37,15 @@ public class JournalService {
             journal.setDate(LocalDateTime.now());
             JournalModel saved = journalRepository.save(journal); 
             user.getUserJournals().add(saved);
+            // user.setUserName(null);
             userService.submitUser(user);//when the Id is same then mongoDB just updates the entry instead of adding a new one in the DB
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e + ": Error caused userName is null");
             throw new RuntimeException(e);
         }
     }
 
+    @Transactional
     public void deleteJournal(ObjectId id, String userName){
         UserModel user = userService.findByUserName(userName);
         user.getUserJournals().removeIf(x -> x.getId().equals(id));
