@@ -7,10 +7,11 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import com.ajit.journalApp.Services.UserService;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+    
     @Autowired
     private UserService userService;
 
@@ -44,32 +46,22 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/submit-user")
-    public ResponseEntity<UserModel> submitUser(@RequestBody UserModel user){
-        try{
-            userService.submitUser(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PutMapping("/update-user/{userName}")
-    public ResponseEntity<?> updateUser(@RequestBody UserModel user, @PathVariable String userName){
+    @PutMapping("/update-user")
+    public ResponseEntity<?> updateUser(@RequestBody UserModel user){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         UserModel original = userService.findByUserName(userName);
-        if(original != null){
-            original.setUserName(user.getUserName());
-            original.setUserPassword(user.getUserPassword());
-        }
+        original.setUserName(user.getUserName());
+        original.setUserPassword(user.getUserPassword());
         userService.submitUser(original);
         return new ResponseEntity<>( HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/delete-user/{id}")
-    public ResponseEntity<?> deleteUser (@PathVariable ObjectId id){
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser (){
         // ObjectId objectId = new ObjectId(id);This would work when the data type of id is other than ObjectId
-        
-        userService.deleteUser(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        userService.deleteByUserName(authentication.getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
