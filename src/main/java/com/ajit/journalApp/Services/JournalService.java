@@ -35,10 +35,13 @@ public class JournalService {
         try {
             UserModel user = userService.findByUserName(userName);
             journal.setDate(LocalDateTime.now());
+
             JournalModel saved = journalRepository.save(journal); 
+
             user.getUserJournals().add(saved);
+
             // user.setUserName(null);
-            userService.submitUser(user);//when the Id is same then mongoDB just updates the entry instead of adding a new one in the DB
+            userService.saveUser(user);//when the Id is same then mongoDB just updates the entry instead of adding a new one in the DB
         } catch (Exception e) {
             System.out.println(e + ": Error caused userName is null");
             throw new RuntimeException(e);
@@ -46,11 +49,24 @@ public class JournalService {
     }
 
     @Transactional
-    public void deleteJournal(ObjectId id, String userName){
-        UserModel user = userService.findByUserName(userName);
-        user.getUserJournals().removeIf(x -> x.getId().equals(id));
-        userService.submitUser(user);
-        journalRepository.deleteById(id);
+    public boolean deleteJournal(ObjectId id, String userName){
+        boolean removed = false;
+
+        try{
+            UserModel user = userService.findByUserName(userName);
+
+            removed = user.getUserJournals().removeIf(x -> x.getId().equals(id));
+
+            if (removed) {
+                userService.saveUser(user);
+                journalRepository.deleteById(id);
+            }
+            
+        }catch(Exception e){
+            System.out.println(e + "Error in deleting the journal");
+            throw new RuntimeException("An Error occured while deleting the journal", e);
+        }
+        return removed;
     }
 
     public void deleteJournalFix(ObjectId id) {
