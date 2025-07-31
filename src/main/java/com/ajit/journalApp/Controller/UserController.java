@@ -1,6 +1,5 @@
 package com.ajit.journalApp.Controller;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
@@ -26,16 +25,6 @@ public class UserController {
     
     @Autowired
     private UserService userService;
-
-    @GetMapping("/getAll")
-    public ResponseEntity<?> getAllUsers(){
-        
-        List<UserModel> users = userService.getAllUsers();
-        if(users != null && !users.isEmpty()) {
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
 
     @GetMapping("/get-user/{id}")
     public ResponseEntity<UserModel> getUser(@PathVariable ObjectId id){

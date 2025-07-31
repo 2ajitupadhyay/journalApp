@@ -35,6 +35,12 @@ public class UserService{
         userRepository.save(user);
     }
 
+    public void submitAdmin(UserModel user){
+        user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
+        user.setRoles(Arrays.asList("USER", "ADMIN"));
+        userRepository.save(user);
+    }
+
     //NEW METHOD CREATED FOR SAVING WITHOUT ENCODING
     public void saveUser(UserModel user){
         userRepository.save(user);
