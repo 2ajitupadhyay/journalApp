@@ -6,6 +6,11 @@ spring:
       auto-index-creation: true
 
 server:
-  port: 8081
+  port: 8082
   servlet:
-  context-path: /journal
+   context-path: /journal
+
+# spring:
+#   profiles:
+#     active: prod
+# 54498334469647908bb182431250210

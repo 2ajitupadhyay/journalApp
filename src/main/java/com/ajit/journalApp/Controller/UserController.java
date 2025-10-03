@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ajit.journalApp.Model.UserModel;
 import com.ajit.journalApp.Services.UserService;
+import com.ajit.journalApp.Services.WeatherService;
+import com.ajit.journalApp.api.response.WeatherResponse;
 
 @RestController
 @RequestMapping("/user")
@@ -25,6 +27,9 @@ public class UserController {
     
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private WeatherService weatherService;
 
     @GetMapping("/get-user/{id}")
     public ResponseEntity<UserModel> getUser(@PathVariable ObjectId id){
@@ -52,5 +57,17 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         userService.deleteByUserName(authentication.getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/message")
+    public ResponseEntity<?> getMessage(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        WeatherResponse weatherResponse = weatherService.getWeather("Bengaluru");
+        String message = ", Weather fells like " + weatherResponse.getCurrent().getFeelslike_c() + "C";
+        if (message != null) {
+            return new ResponseEntity<>("Hi " + authentication.getName() + message,HttpStatus.OK);
+            
+        }
+        return new ResponseEntity<>("Hi " + authentication.getName(),HttpStatus.OK);
     }
 }
